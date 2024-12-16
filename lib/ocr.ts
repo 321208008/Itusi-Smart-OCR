@@ -2,8 +2,8 @@ import { createWorker } from 'tesseract.js';
 
 type ImageInput = string | File | Blob;
 
-function isBlob(value: ImageInput): value is Blob | File {
-  return value instanceof Blob || value instanceof File;
+function isString(value: ImageInput): value is string {
+  return typeof value === 'string';
 }
 
 export async function performOCR(imageData: ImageInput): Promise<string> {
@@ -11,15 +11,15 @@ export async function performOCR(imageData: ImageInput): Promise<string> {
     const worker = await createWorker('chi_sim+eng');
     
     let imageUrl: string;
-    if (isBlob(imageData)) {
-      imageUrl = URL.createObjectURL(imageData);
-    } else {
+    if (isString(imageData)) {
       imageUrl = imageData;
+    } else {
+      imageUrl = URL.createObjectURL(imageData);
     }
 
     const { data: { text } } = await worker.recognize(imageUrl);
     
-    if (isBlob(imageData)) {
+    if (!isString(imageData)) {
       URL.revokeObjectURL(imageUrl);
     }
     
